@@ -615,3 +615,106 @@ SOC 应用场景：告警源 IP 192.168.1.5，目的 IP 192.168.1.100，掩码 /
 就算办公电脑被木马拿下，横向也无法直接访问服务器，缩小攻击面。
  
 子网划分核心一句话：借主机位，变成新的网络位，切出更小网段，隔离网络，提升安全。
+
+
+
+
+Linux 网络安全运维常用命令：
+
+1. useradd —— 创建系统用户（账号安全）。
+
+useradd testuser  # 创建用户testuser，默认同时创建同名组/home/testuser。
+useradd -m testuser  # -m 自动创建家目录（最常用）。
+useradd -s /sbin/nologin testuser  # 创建不能登录的系统账号（服务账号）。
+
+设置密码。
+
+passwd testuser。
+
+2. chmod —— 修改文件 / 目录权限（权限安全）。
+
+作用：修改文件读写执行权限，控制谁能读、写、运行文件。
+权限分为三类：所有者 u、所属组 g、其他用户 o；r=4 读，w=2 写，x=1 执行。
+
+chmod 755 test.sh  # 所有者读写执行，组和其他人读+执行。
+chmod 644 test.txt  # 文件常用：所有者读写，其他人只读。
+chmod +x test.sh  # 给文件增加执行权限。
+chmod -R 700 /data  # -R 递归修改目录下所有文件权限。
+
+3. chown —— 修改文件所有者和所属组。
+
+作用：改变文件属于哪个用户、哪个用户组。
+
+chown nginx:nginx index.html  # 所有者nginx，组nginx。
+chown root test.txt  # 仅修改所有者为root。
+chown -R www:www /web  # -R递归修改整个目录。
+
+4. sudo —— 普通用户临时获取管理员权限。
+
+作用：普通用户不需要登录 root，临时执行 root 权限命令。
+配置文件：`/etc/sudoers`（用`visudo`编辑，不要 vi 直接改）。
+
+sudo ls /root  # 普通用户临时root权限查看root目录。
+sudo su -  # 切换成root。
+
+5. /var/log/secure —— 安全日志（登录审计，入侵排查重点！）。
+ 
+RHEL/CentOS 系列；Ubuntu 是 `/var/log/auth.log`。
+作用：记录ssh 登录、su 切换、sudo 操作、账号认证失败日志，排查暴力破解、异常登录。
+
+# 查看所有登录失败记录。
+grep Failed /var/log/secure。
+# 查看登录成功记录。
+grep Accepted /var/log/secure。
+
+6. ps —— 查看系统进程（查杀可疑进程必备）。
+
+作用：列出当前运行进程，排查木马、恶意进程、挖矿程序。
+
+ps aux  # 最常用！a所有用户进程，u详细信息，x无终端进程（木马经常无终端）。
+ps efH  # 树形展示进程父子关系，看恶意进程父进程。
+
+7. netstat /ss —— 查看端口监听，找对外端口。
+
+netstat 旧工具；ss 是新一代，速度更快，推荐优先 ss。
+作用：查看网络连接、监听端口，排查后门程序、恶意端口外联。
+
+netstat -antlp；
+ss -antlp：
+参数说明：a所有连接，n数字端口不解析域名，t tcp，l监听端口，p显示进程PID/程序名。
+
+8. 查杀可疑进程（安全运维实操）。
+
+流程：
+
+1. `ps aux` 或者 `ss -antlp` 找到可疑进程 PID。
+2. 先用 `ls -l /proc/PID/exe` 看进程对应程序路径（确认恶意文件）。
+3. 杀死进程。
+
+kill  1234  # 正常终止PID=1234进程。
+kill -9 1234  # 强制杀死进程（杀不掉的时候用，慎用）。
+
+9. tail —— 实时查看日志。
+
+作用：查看日志末尾，最常用实时跟踪日志。
+
+tail /var/log/secure  # 默认看最后10行。
+tail -n 50 /var/log/secure  # 看最后50行。
+tail -f /var/log/secure  # -f 实时滚动输出日志（实时监控登录行为）。
+tail -F /var/log/secure  # 文件被轮换也能继续跟踪（生产推荐）。
+
+10. grep —— 文本过滤，检索关键字。
+
+grep "Accepted" /var/log/secure  # 筛选登录成功日志。
+grep -i "failed" /var/log/secure  # -i忽略大小写。
+grep -v "root" /var/log/secure  # -v反向匹配，排除root行。
+
+如果服务器疑似被入侵，安全运维排查步骤：
+
+1. 查看账号：`cat /etc/passwd`，检查可疑账号。
+2. 查看登录日志：`tail -f /var/log/secure | grep -E "Failed|Accepted"`，看爆破、异常登录 IP。
+3. 查看端口监听：`ss -antlp`，找出陌生监听端口和对应 PID。
+4. 查看进程：`ps aux`，根据 PID 找到可疑恶意进程。
+5. 查看进程程序路径：`ls -l /proc/$PID/exe`。
+6. 查杀：`kill -9 PID`，删除恶意文件。
+7. 复查：再次 ps、ss 确认进程端口消失，检查定时任务 / 开机自启。
