@@ -1,0 +1,106 @@
+基础指令：
+
+1、基础网络命令。
+
+ipconfig  # 查看本机IP、网卡信息。
+ipconfig /all  # 完整网卡信息、MAC地址。
+ping 192.168.1.1  # 测试连通性。
+tracert 192.168.1.1 # 路由追踪。
+arp -a  # ARP缓存，查看局域网存活主机。
+netstat -ano  # 查看所有端口、进程PID。
+netstat -ano | findstr ":80"  # 查询80端口占用。
+
+2、进程与服务管理。
+
+tasklist  # 列出所有正在运行进程。
+taskkill /f /pid 1234  # 强制结束PID=1234进程。
+taskkill /f /im notepad.exe  # 按程序名杀进程。
+net start  # 查看已启动服务。
+net stop spooler  # 停止打印服务。
+net start spooler  # 开启服务。
+services.msc  # 图形界面服务管理器。
+
+3、用户账户（权限、提权常用）。
+
+net user  # 列出本机所有用户。
+net user admin 123456  # 修改admin密码为123456。
+net user hacker /add  # 新建用户hacker。
+net localgroup administrators hacker /add  # 将用户加入管理员组。
+lusrmgr.msc  # 用户账户图形管理器。
+
+4、文件、目录操作。
+
+dir  # 列出当前文件夹文件。
+dir /s  # 递归列出所有子目录文件。
+cd C:\Users  # 切换目录。
+md test  # 新建文件夹test。
+rd 文件  #删除文件夹。
+del test.txt  # 删除文件。
+copy C:\1.txt D:\  # 复制文件。
+move C:\1.txt D:\  # 移动文件。
+echo 1 > 1.txt  #写入文件。
+del 1.txt  #删除文件。
+ren 1.txt 2.txt  #更改文件名称。
+
+5、系统信息查询。
+
+systeminfo  # 完整系统信息、补丁版本。
+hostname  # 查看计算机名。
+whoami  # 当前登录用户名。
+whoami /all  # 当前用户全部权限信息。
+
+6、共享文件夹 / SMB（你刚才访问主机共享用）。
+
+net view \\192.168.1.153  # 查看对方主机开放共享。
+net use \\192.168.1.153\share  # 连接共享文件夹。
+net use * /del /y  # 删除全部已保存的共享连接凭据。
+如果你之前访问共享一直失败，执行 `net use * /del /y` 可以清除缓存密码，重新弹窗输入账号。
+
+7、快速打开系统工具命令（Win+R 直接输）。
+
+ncpa.cpl  # 网络适配器面板。
+firewall.cpl  # Windows防火墙。
+compmgmt.msc  # 计算机管理（磁盘、任务计划、本地用户）。
+regedit  # 注册表编辑器。
+gpedit.msc  # 本地组策略（域环境/权限）。
+
+
+进阶指令：
+
+1. 开启远程桌面。
+
+wmic RDToggle where ServerName='.' call SetAllowTSConnections 1。
+
+2. 防火墙放行 3389 端口。
+
+netsh advfirewall firewall add rule name="RDP‑3389" dir=in action=allow。 protocol=TCP localport=3389 remoteip=any profile=any enable=yes。
+
+3. 关闭防火墙（靶场练习最简单，推荐）。
+
+netsh advfirewall set allprofiles state off。
+打开：`netsh advfirewall set allprofiles state on`。
+
+4. 查看 3389 端口是否监听。
+
+netstat -ano | findstr ":3389"。
+
+5. 查看本机 IP（用来从 kali/mstsc 连接）。
+
+ipconfig。
+
+6. 设置管理员密码（空密码远程桌面连不上）。
+
+net user Administrator 123456。
+密码改成你自己想要的。
+
+7. 从外部电脑连接靶机。
+
+Windows 宿主机：Win+R → `mstsc`。
+填入靶机 IP，用户名：`Administrator`，密码：`123456`。
+
+
+补充命令：
+whoami。
+systeminfo。
+net user。
+net localgroup administrators。

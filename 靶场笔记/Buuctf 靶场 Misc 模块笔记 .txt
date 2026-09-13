@@ -1,0 +1,34 @@
+MISC 靶场有用的内容（必练）：
+
+1）. 文件隐写（binwalk /foremost/steghide / 文件追加数据）。
+对应工作：钓鱼附件、恶意文件藏载荷，应急响应排查可疑附件。
+
+2）. 基础编码解码：base64、hex、url 编码、rot13。
+SOC 日志、恶意脚本、payload 里面最常见。
+
+3）. PCAP 流量分析（Wireshark，属于 MISC 流量题）高价值。
+SOC 超级刚需！看懂 HTTP 请求、DNS、可疑外联、攻击流量，优先级很高。
+
+4）. 基础内存取证（volatility 简单题）。
+进阶应急响应，加分项。
+
+
+题库：
+
+1.扫描二维码：
+
+zbarimg QR_code.png。
+使用 binwalk 扫描文件内部嵌入的数据。
+binwalk QR_code.png。
+foremost 提取出来。
+foremost QR_code.png。
+暴力破解加密 zip 的 4 位数字密码。
+fcrackzip -b -c '1' -l 4-4 -u 00000000.zip。
+
+参数：
+-b：暴力破解模式。
+-c '1'：密码字符集 = 纯数字 0‑9。
+-l 4‑4：密码固定长度 4 位。
+-u ：验证密码有效性，找到立刻停止。
+unzip 00000000.zip。
+cat 4number.txt。

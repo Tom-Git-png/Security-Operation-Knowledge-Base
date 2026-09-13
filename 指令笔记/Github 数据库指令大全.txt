@@ -1,0 +1,18 @@
+同步原作者最新代码（拉取原版更新）：
+
+git fetch upstream  #拉取原作者最新代码。
+git checkout master 
+git merge upstream/master  #合并到你本地。
+git push origin master  #上传更新到你github副本。
+
+
+本地修改文件 → 上传到你自己的 Github：
+
+git add .。
+git commit -m "写一句你修改内容的备注"。
+git push。
+
+
+恢复 SSL 安全校验：
+
+git config --global http.sslVerify true。

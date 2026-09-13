@@ -1,0 +1,80 @@
+Linux指令练习：
+
+- id 命令获取一些更多关于用户的信息：-un 提取用户名。
+
+- . 以 . 开头为隐藏文件。
+
+-cp file2.txt testdir/ 复制文件。
+
+-cp -r testdir testdir_copy 复制所有文件。
+
+-rmdir 删除非空目录。
+
+-rm -rf 强制删除文件。
+
+-cat -n 为文本里的每一行添加行号。
+
+-head -n1 显示文本的第一行。
+
+-head -c1 显示文本的第一个字节。
+
+-tail -n1 显示文本的末尾第一行    -c1 同理。
+
+-tail 默认显示文本的最后10行。
+
+-diff 比较两个不同文件。
+
+-sudo chown 是用于更改所有权的命令    sudo 用来提权。
+
+-ls -l 中的 -d 选项告诉 ls 列出目录本身，而不是目录内容。
+
+-sudo useradd 增加用户。
+
+-sudo useradd -m 选项会让系统为该用户创建主目录。
+
+-sudo passwd 设置用户密码。
+
+-sudo grep -w 'joker' /etc/passwd 检查用户状态。
+
+-sudo usermod -aG sudo joker。
+
+-aG 表示「追加到组」（将用户添加到组，同时保留用户已有的其他组）。
+
+-sudo passwd -l joker  锁定用户  -u 解锁账户。
+
+-curl 会向运行在 localhost（指你自己的计算机）的 8000 端口上的 HTTP 服务器发送请求。
+
+-nmap -sT -p 8000 localhost。
+
+-nmap -sV -p 8080 localhost 本地 Web 版本探测。
+
+-sT 是一个选项，用于指定 TCP 连接扫描。这告诉 Nmap 使用 TCP 连接方法来检查端口的状态。
+
+-p 8000 表示我们希望 Nmap 仅扫描端口 8000。如果需要，你可以更改这个数字来扫描其他端口。
+
+-localhost 是我们扫描的目标。它指的是运行服务的本地机器。
+
+-sV 选项用于告诉 Nmap 对开放端口进行探测，以确定服务/版本信息。这意味着 Nmap 将尝试查明开放端口上运行的具体软件及其版本。
+
+-p- 选项告诉 Nmap 扫描从 1 到 65535 的所有端口。这个扫描完成所需的时间会更长，因为它必须检查每一个端口。
+
+-nmap -oN normal_output.txt localhost在这个命令中，-oN 选项用于指示 Nmap 将输出保存为普通格式，normal_output.txt 是存储结果的文名。
+
+-oX 选项告诉 Nmap 将输出保存为 XML 格式。xml_output.xml 是保存 XML 格式结果的文件。
+
+-oG 选项用于将输出保存为可 grep 格式，grepable_output.txt 是存储结果的文件。
+
+-while true;do nc -n -lvp 7777;done 无线监听 。
+
+-n 直接检查IP。
+
+-v 详细输出信息。
+
+-nmap localhst > 1.txt 将主机所有开放端口写入文件 1.txt 中。
+
+-& 命令后加 & 代表在后台运行。
+
+-# root 身份 $ 普通身份。
+
+
+

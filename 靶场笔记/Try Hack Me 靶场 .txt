@@ -1,0 +1,56 @@
+学习笔记：
+
+1.dirb/gobuster 用来扫描网站隐藏目录。
+
+如：
+dirb http://fakebank.thm /usr/share/wordlists/dirb/common.txt。
+gobuster dir -u http://fakebank.thm -w /usr/share/wordlists/dirb/common.txt。
+
+参数：
+- dir：目录扫描模式。
+- -u：目标网址。
+- -w：指定字典文件。
+- dir：web 目录扫描。
+- dns：子域名爆破。
+- vhost：虚拟主机扫描。
+
+2. disabling the account = 禁用账号，属于遏制 (Contain)阶段的处置手段，防止攻
+击者拿到密码后成功登录系统。
+
+3. 威胁情报 Threat Intelligence：收集攻击者 IP、攻击手法、攻击团伙特征、惯用战术，存入
+数据库。之后再遇到该团伙攻击，SOC 团队就能提前识别并防御。
+
+4. Incident Report（安全事件报告）是 SOC 事件响应流程的收尾环节。报告里一般包含：
+- 攻击发生时间。
+- 攻击者信息。
+- 攻击行为（暴力破解登录）。
+- 采取的处置动作（锁定账号）。
+- 事后改进建议。
+用于存档复盘、团队培训、向上级汇报。
+对应事件响应生命周期最后的 事后复盘（Lessons Learned）阶段。
+
+5.Shodan 常常被称作 物联网搜索引擎。
+常用 Shodan 筛选指令（你后面任务大概率会用到）。
+port:80  # 指定端口。
+country:CN  # 指定国家。
+os:Windows  # 指定操作系统。
+product:apache  # 指定服务产品。
+version:2.4.1  # 指定版本。
+
+6.CVE：（通用漏洞披露）计划。
+
+7.Linux 查询命令。
+
+man：想要查找的指令的参数。
+
+8.PoC (Proof‑of‑Concept)：概念验证代码。
+
+9.Exploit（EXP）：漏洞利用程序。
+
+10.&：运行命令，但不等它执行完毕就可以执行别的操作。命令会在后台运行。适合耗时较长、需要持续运行的任务。
+
+11.&&：先后执行两条命令，等待第一条执行完成之后，才运行第二条（前一条成功才会执行后一条），类似多米诺骨牌。
+
+12.>：输出重定向。将命令的输出写入文件。会覆盖掉文件原有全部内容。
+
+13.>>：同样是输出重定向，但不会覆盖原有内容，而是追加写到文件末尾。
