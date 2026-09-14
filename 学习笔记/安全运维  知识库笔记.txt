@@ -718,3 +718,187 @@ grep -v "root" /var/log/secure  # -v反向匹配，排除root行。
 5. 查看进程程序路径：`ls -l /proc/$PID/exe`。
 6. 查杀：`kill -9 PID`，删除恶意文件。
 7. 复查：再次 ps、ss 确认进程端口消失，检查定时任务 / 开机自启。
+
+
+
+
+Windows 常用命令：
+
+一、基础系统 & 信息查看命令（入职巡检必用）。
+
+1. systeminfo：
+
+作用：查看系统版本、补丁、安装时间、主机名、域信息。
+安全运维场景：拿到一台陌生 Windows 服务器，第一时间收集系统基线信息，判断有没有漏补丁；应急溯源。
+
+systeminfo；
+
+面试考点：可以看系统是否加入域、OS 版本、热修复补丁列表。
+
+2. hostname：
+
+作用：查看本机主机名。
+
+hostname；
+
+3.whoami：
+
+作用：查看当前登录账号，带权限信息。
+安全场景：判断当前是普通用户还是管理员；内网排查权限，渗透排查权限。
+
+whoami；
+whoami /all    # 查看完整权限、SID、用户组。
+
+4. ver：
+
+查看 windows 版本号。
+使用失败可以尝试 cmd /c ~。
+
+二、网络类命令（网络安全运维核心，面试必考）。
+
+1. ipconfig：
+
+ipconfig；
+ipconfig /all  # 完整信息：网卡MAC、DNS、DHCP服务器。
+ipconfig /release  # 释放IP。
+ipconfig /renew  # 重新获取DHCP IP。
+ipconfig /flushdns  # 清空本地DNS缓存（排查DNS劫持、解析异常）。
+
+安全场景：查看网卡信息、MAC 地址；排查 DNS 污染；应急时清除恶意 DNS 缓存。
+
+2. ping：
+
+ping 192.168.1.1；
+ping baidu.com；
+ping -t 192.168.1.1  # 持续ping，Ctrl+C停止。
+ping -n 4 192.168.1.1  # 发送4个包。
+
+作用：测试连通性。安全注意：很多服务器防火墙禁 ping，ping 不通≠主机不存在。
+
+3. tracert（路由追踪）：
+
+tracert 8.8.8.8；
+
+作用：追踪数据包从本机到目标 IP 经过的路由节点。
+安全运维：排查网络断点，定位哪一跳丢包；溯源访问路径。
+
+4. netstat：
+
+查看端口、网络连接，排查恶意外联、木马后门。
+
+netstat -ano；
+
+参数解释：
+
+- -a：所有连接 + 监听端口。
+- -n：数字 IP，不解析域名（速度快）。
+- -o：显示进程 PID。
+运维用法：看到可疑端口，记下 PID，去任务管理器找到对应程序，判断是不是木马。
+
+补充：新版 Windows 推荐 `Get-NetTCPConnection`（PowerShell），面试两个都要了解。
+
+5. nslookup：
+
+DNS 解析查询，排查域名解析问题，安全用来查域名 IP。
+
+nslookup baidu.com；
+
+补充：
+SID:（Security Identifier，安全标识符）,控制权限、文件访问、登录身份。Windows 底层不认用户名，只认 SID。
+PID:（Process ID，进程 ID）发现可疑外联 IP，拿到 PID，找到是哪个程序在联网，排查木马、后门。
+
+三、用户 & 权限管理（Windows 服务器运维、安全基线）。
+
+Windows 是多用户系统，账号安全是安全运维核心。
+
+1.net user：
+
+net user  # 列出本机所有用户账号。
+net user admin  # 查看admin账号详细信息。
+net user admin 123456 /add  # 创建用户admin，密码123456。
+net user admin /del  # 删除用户。
+
+2.net localgroup 用户组管理：
+
+net localgroup administrators  # 查看管理员组内有哪些账号。
+
+安全场景：检查管理员组是否有陌生账号，黑客入侵经常新建管理员后门账号。
+
+四、进程、服务管理（排查病毒、恶意程序）。
+
+1.tasklist查看进程：
+
+tasklist；
+tasklist | findstr "qq"  # 过滤查找指定进程。
+
+2.taskkill结束进程：
+
+taskkill /F /PID 1234  # /F强制结束，PID用netstat查到的进程号。
+taskkill /F /IM virus.exe  # 按程序名结束。
+
+3.sc服务管理（Windows 后台服务）。
+
+恶意木马经常注册成系统服务开机自启！
+
+sc.exe query  # 查询所有服务状态。
+sc.exe query | findstr "xxx"  # 查找指定服务。
+sc.exe stop 服务名  # 停止服务。
+sc.exe delete 服务名  # 删除服务（谨慎！）。
+
+五、文件操作命令（应急取证，日志查看）。
+
+dir  # 列出当前目录文件。
+dir /a  # 查看所有文件，包含隐藏文件（病毒常隐藏）。
+cd 文件夹名  # 切换目录。
+copy  # 复制文件。
+del  # 删除文件。
+type 1.txt  # 查看文本内容。
+
+六、日志与事件查看（安全应急、入侵排查核心）。
+
+安全运维最重要工作之一：看系统事件日志。
+
+eventvwr.msc；
+
+七、远程运维命令（企业运维场景）。
+
+mstsc  # 打开远程桌面RDP，Windows服务器远程管理。
+
+八、PowerShell 简单命令（现在企业越来越多用，安全岗必考）。
+ 
+PowerShell 比 cmd 更强大，攻防都在用。
+
+Get-Process  # 查看进程。
+Get-Service  # 查看服务。
+Get-NetTCPConnection  # 查看端口连接（替代netstat）。
+
+补充：
+1.防火墙命令（非常重要！Windows 自带防火墙）。
+
+cmd：
+
+netsh advfirewall show allprofiles  # 查看防火墙状态。
+netsh advfirewall firewall show rule name=all  # 查看所有防火墙规则。
+
+PowerShell 新版推荐：
+
+Get-NetFirewallRule;
+
+2.共享、会话排查（内网安全重点）。
+
+黑客经常利用 Windows 共享横向移动。
+
+net share  # 查看本机开启的共享文件夹。
+net use  # 查看本机建立的远程共享连接。
+net session  # 查看谁正在连你这台机器（重点！查内网访问）。
+
+3.计划任务（后门重灾区！黑客最喜欢在这里留后门）。
+
+schtasks /query /fo table /nh；
+
+
+
+
+
+
+
