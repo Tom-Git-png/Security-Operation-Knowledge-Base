@@ -1,0 +1,119 @@
+举例：
+
+- index=_internal 查看 Splunk 本身产生的日志。
+
+-index=_internal | head 10 | table _time sourcetype host _raw 看前10条splunk内部日志。
+
+-index=_internal | stats count by sourcetype | sort -count 统计_internal索引各类日志源的数量。
+
+第一部分：必学。
+
+1. 基础检索（检索原始日志）。
+
+# 基础。
+index=xxx sourcetype=xxx host=xxx；
+# 布尔：AND OR NOT，括号分组。
+index=_internal (level=WARN OR level=ERROR)。
+# 通配符。 
+index=_internal source=*splunkd.log；
+# 时间范围 earliest / latest；
+index=_internal earliest=-1h；
+
+重点：`index`、`sourcetype`、`host`、布尔逻辑、时间筛选。
+
+2. 管道符 `|` 核心概念。
+
+左边输出 → 管道传给右边命令，从左往右执行。
+
+index=_internal | head 10 | table _time, source, level；
+
+3. `head`、`tail`：取前 N 条 / 最后 N 条。
+
+index=_internal | head 10。
+index=_internal | tail 5。
+
+4. `table`：只展示指定字段（最常用）。
+
+index=_internal | table _time, host, source, level, _raw；
+
+`_time`= 事件时间，`_raw`= 完整原始日志。
+
+5. `stats` 聚合统计（SPL 最重要命令，一定要练熟）。
+
+做日志计数、统计、分组，安全排查高频。
+
+# 总条数。
+index=_internal | stats count；
+
+# 按字段分组统计数量 by；
+index=_internal | stats count by level；
+
+# 常用函数。
+count  # 计数。
+values(xxx)  # 列出所有不重复的值。
+latest(xxx)  # 获取最新一条的值。
+
+6. `top` / `rare`；
+
+- `top`：出现最多的前 N 项（找高频登录失败 IP）。
+- `rare`：出现最少的。
+
+index=_internal | top 5 source；
+
+7. `sort` 排序，`-` 降序。
+
+index=_internal | stats count by source | sort -count；
+
+8. `dedup` 去重，删除重复事件。
+
+index=_internal | dedup source；
+
+9. `timechart` 按时间统计，自动生成图表（做监控、告警）。
+
+index=_internal | timechart span=10m count by level；
+
+`span=10m`：时间粒度 10 分钟，单位 m/h/d；
+
+10. `where` 过滤聚合后的结果。
+
+和开头检索不一样：where 是管道之后，对已经处理完的数据过滤。
+
+index=_internal | stats count by source | where count > 10。
+
+第二部分：进阶（Windows 安全日志分析必备）。
+
+1. `rex` 正则提取字段（难点，日志里提取 IP、账号、进程名）。
+
+# 示例，从日志_raw提取IP；
+index=_internal | rex field=_raw "IP:\s+(?P<src_ip>\d+\.\d+\.\d+\.\d+)" | table src_ip；
+
+`(?P<字段名>正则)` 是 rex 核心语法。Windows 安全日志提取登录源 IP、用户名全靠它。
+
+2. `eval` 新建 / 计算自定义字段。
+
+index=_internal | eval alert_flag=if(level="ERROR",1,0) | table _time,level,alert_flag；
+
+`if(条件,满足值,不满足值)` 非常实用。
+
+3. `rename` 重命名字段。
+
+index=_internal | rename source AS 日志来源。
+
+4. `search` 在管道内二次过滤。
+
+管道里面再次检索，和开头检索语法一致。
+
+index=_internal | search level=ERROR；
+
+5. `fields` 保留 / 删除字段。
+
+index=_internal | fields -_raw  # 删除_raw原始日志。
+index=_internal | fields _time,level；
+
+第三部分：高阶（后面做告警、仪表盘、复杂狩猎时再学）。
+
+- `transaction`：把多条关联日志合并成一个事件（比如一次登录的多段日志）。
+- `join`：多索引关联查询（类似 SQL join）。
+- `lookup`：外部 csv 映射（IP 归属地、账号信息）。
+- `streamstats`：滚动统计（累计计数）。
+- `geostats`：地图可视化。
