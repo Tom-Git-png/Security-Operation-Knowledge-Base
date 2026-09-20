@@ -6,6 +6,8 @@
 
 -index=_internal | stats count by sourcetype | sort -count 统计_internal索引各类日志源的数量。
 
+-加上 "Falied password" 筛选出所有 SSH 密码失败的爆破日志。
+
 第一部分：必学。
 
 1. 基础检索（检索原始日志）。

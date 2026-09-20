@@ -1,10 +1,10 @@
-#存活主机扫描脚本
+#存活主机扫描脚本（Windows）
 
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
 def ping(ip):
-    cmd = ['ping', '-c', '1', '-w','300',ip]
+    cmd = ['ping', '-n', '1', '-w','300',ip]
     res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if res.returncode == 0:
         print("主机存活")
@@ -15,7 +15,7 @@ if __name__ == '__main__':
         for i in range (1,10):
             t.submit(ping,net+str(i))
 
-#端口开放扫描脚本
+#端口开放扫描脚本（Windows）
 
 import socket
 from concurrent.futures import ThreadPoolExecutor
@@ -35,3 +35,26 @@ if __name__ == '__main__':
     with ThreadPoolExecutor(20) as t:
         for i in range(start_port,end_port+1):
             t.submit(scan_port,ip,i)
+
+#批量 Web 站点存活检测脚本（Windows）
+
+import requests
+from concurrent.futures import ThreadPoolExecutor
+
+def check_web(url):
+    try:
+        resp = requests.get(url,timeout=3,allow_redirects=False)
+        print(f"[{resp.status_code}] {url} 可以访问")
+    except Exception as e:
+        print(f"[{resp.status_code}] {url} 无法访问")
+
+if __name__ == '__main__':
+    sites = [
+        "https://www.google.com",
+        "https://www.yahoo.com",
+        "https://www.sina.com.cn",
+        "https://www.baidu.com"
+    ]
+    with ThreadPoolExecutor(max_workers=10) as t:
+        for site in sites:
+            t.submit(check_web, site)
