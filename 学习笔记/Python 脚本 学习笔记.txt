@@ -58,3 +58,54 @@ if __name__ == '__main__':
     with ThreadPoolExecutor(max_workers=10) as t:
         for site in sites:
             t.submit(check_web, site)
+
+#系统安全基线巡检脚本 `security_check.sh`（Linux）
+
+#!/bin/bash
+# Linux安全巡检脚本
+echo "==================== Linux安全巡检开始 $(date) ===================="
+LOG_FILE="/var/log/security_check.log"
+
+# 1. 用户账号检查
+echo -e "\n[1] 账号列表&空密码检测" | tee -a $LOG_FILE
+cat /etc/passwd | cut -d: -f1,3,4,7 | tee -a $LOG_FILE
+echo "==== 空密码用户 ====" | tee -a $LOG_FILE
+awk -F: '($2==""){print $1}' /etc/shadow 2>/dev/null
+
+# 2. 特权账号UID=0
+echo -e "\n[2] UID=0账号(除root外异常)" | tee -a $LOG_FILE
+awk -F: '($3==0){print $1}' /etc/passwd | tee -a $LOG_FILE
+
+# 3. 监听端口
+echo -e "\n[3] 监听端口列表" | tee -a $LOG_FILE
+ss -tulnp | tee -a $LOG_FILE
+
+# 4. 进程检查
+echo -e "\n[4] 高占用进程" | tee -a $LOG_FILE
+top -b -n1 | head -20 | tee -a $LOG_FILE
+
+# 5. 防火墙状态
+echo -e "\n[5] 防火墙状态" | tee -a $LOG_FILE
+if command -v systemctl &>/dev/null;then
+systemctl status firewalld ufw 2>/dev/null | tee -a $LOG_FILE
+fi
+
+#6. SSH配置检查
+echo -e "\n[6] SSH安全配置" | tee -a $LOG_FILE
+grep -E 'PermitRootLogin|PasswordAuthentication' /etc/ssh/sshd_config | tee -a $LOG_FILE
+
+#7. 最近登录
+echo -e "\n[7] 最近登录记录 last" | tee -a $LOG_FILE
+last | head -15 | tee -a $LOG_FILE
+
+#8. 定时任务
+echo -e "\n[8] 系统crontab" | tee -a $LOG_FILE
+ls -l /etc/cron.* 2>/dev/null | tee -a $LOG_FILE
+crontab -l 2>/dev/null | tee -a $LOG_FILE
+
+#9. 敏感文件权限
+echo -e "\n[9] /etc/passwd /etc/shadow权限" | tee -a $LOG_FILE
+ls -l /etc/passwd /etc/shadow | tee -a $LOG_FILE
+
+echo -e "\n==================== 巡检结束 $(date)，日志：$LOG_FILE ===================="
+
