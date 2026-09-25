@@ -1818,6 +1818,36 @@ kill -9 PID  # 强制杀死进程，慎用，容易丢数据。
 
 
 
+交换路由核心知识点：
+
+1. 子网划分：将大 IP 网络切分为多个小子网，用于网段隔离、ACL 编写，缩小攻击面。
+
+2. VLAN、802.1Q、PVID：VLAN 划分独立广播域，二层隔离；802.1Q 是 4 字节 VLAN 标签；PVID 为本征 VLAN，默认 VLAN1，存在 VLAN 跳跃攻击风险，业务不使用 VLAN1，Trunk 只放必要 VLAN。
+
+3. ARP、ARP 欺骗、DAI：ARP 实现 IP 转 MAC；ARP 欺骗伪造 ARP 报文篡改缓存，劫持流量；DAI 校验 ARP 报文，依赖 DHCP Snooping 绑定表拦截伪造 ARP。
+
+4. DHCP、DHCP Snooping：DHCP 自动分配 IP、网关、DNS；非法 DHCP 服务器下发假网关劫持流量；DHCP Snooping 区分 Trusted/Untrusted 端口，阻止终端口发出 DHCP 应答报文。
+
+5. STP、BPDU 欺骗与防护：STP 防止二层环路；BPDU 欺骗伪造 BPDU 抢占根桥，篡改拓扑；BPDU Guard 用于终端口，Root Guard 用于上联口。
+
+6. Port-Security、风暴控制、端口隔离：Port-Security 绑定 MAC，限制 MAC 数量，防御 MAC 泛洪；风暴控制限制广播 / 组播流量阈值；端口隔离实现同 VLAN 内终端二层互访阻断，可访问网关。
+
+7. 静态路由、默认路由、黑洞路由：静态路由手动配置；0.0.0.0/0 为默认路由；黑洞路由指向 Null0，数据包直接丢弃，拉黑恶意网段、防止路由环路。
+
+8. VRRP 与安全风险：VRRP 多设备共享虚拟 IP 做网关；VRRP 欺骗伪造报文抢占 Master 劫持流量；加固开启 VRRP 认证。
+
+9. ICMP 与 ICMP 攻击：ICMP 是 IP 层控制协议，ping 基于 ICMP；常见攻击：ICMP 重定向、Smurf 攻击；边界 ACL 按需管控 ICMP。
+
+10. OSPF 基础 + 安全加固：OSPF 链路状态路由协议，骨干 Area0；Passive-interface 不建立邻居但发布网段；风险是伪造邻居、伪造 LSA 注入假路由；开启 OSPF 认证加固。
+
+11. RIP 基础了解：RIP 距离矢量协议，度量为跳数，最大 15 跳；RIPv2 支持 MD5 认证，易被伪造报文注入虚假路由。
+
+12. BGP 概念、BGP 路由劫持：BGP 是互联网跨 AS 路由协议，TCP179；BGP 劫持是攻击者发布不属于自己的网段，劫持公网流量。
+
+13. ACL、设备安全、Syslog、Wireshark 抓包：ACL 做流量过滤；设备关闭 Telnet，启用 SSH，最小权限账号；Syslog 收集日志用于安全审计；Wireshark 抓包排查故障、分析攻击报文。
+
+
+
 
 
 
